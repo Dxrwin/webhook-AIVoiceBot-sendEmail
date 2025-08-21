@@ -135,6 +135,8 @@ def webhook():
         logging.info(f"  Contesto la llamada: {contesto_llamada}")
         logging.info(f"  Correo proporcionado por el cliente: {correo_cliente}")
         
+        link_whatsapp = "https://wa.me/573182856386"
+        
         # Si no llega mensaje, armamos uno por defecto
         if not mensaje:
             mensaje = f"""
@@ -161,7 +163,7 @@ def webhook():
 
         if enviar_correo:
             destinatario = correo if correo else correo_cliente  # Si no hay correo, usa uno por defecto
-            asunto = "Notificación de Renovación"
+            asunto = "Renueva tu credito educativo con One2credit"
 
             msg = MIMEMultipart()
             msg["From"] = SMTP_USER
@@ -169,22 +171,37 @@ def webhook():
             msg["Subject"] = asunto
 
             cuerpo = f"""
+            
             Hola {nombre}!,
 
-            Hace unos momentos te contactamos, por ello si deseas seguir con el proceso te invitamos que inicies tu proceso a través de este link:
-            {link}
-            EL anterior Link es la interfaz para que Puedas gestionar los valores de tu credito.
+            Hace unos segundos te contactamos de One2credit para renovar tu crédito educativo.  Para que sigas con el proceso, te invitamos a que le des click a este link:
 
-            Saludos que tengas un excelente día,
-            ISA tu asistente virtual de One Two Credit! 
+            {link}
+
+            Desde aquí podrás tener acceso a nuestra plataforma para renovar tu crédito.  Recuerda que si tuviste un buen comportamiento de pago, tu aprobación será automática !
+            
+            este es nuestro canal comercial de whatsapp para que puedas contactarnos:
+            {link_whatsapp}
+
+            Que tengas un excelente día.
+
+
+            ISA, tu asistente virtual de One2credit!
+
             """
 
             msg.attach(MIMEText(cuerpo, "plain"))
 
-            with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-                server.starttls()
-                server.login(SMTP_USER, SMTP_PASS)
-                server.send_message(msg)
+            # Usar SMTP_SSL si el puerto es 465 (GoDaddy)
+            if SMTP_PORT == 465:
+                with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
+                    server.login(SMTP_USER, SMTP_PASS)
+                    server.send_message(msg)
+            else:
+                with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+                    server.starttls()
+                    server.login(SMTP_USER, SMTP_PASS)
+                    server.send_message(msg)
             logging.info("Correo enviado correctamente ✅")
         else:
             logging.info("No se envió correo porque estado es False y interes_renovar es 'No' o 'No responde'.")
